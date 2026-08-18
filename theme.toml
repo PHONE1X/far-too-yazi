@@ -1,0 +1,52 @@
+[flavor]
+dark = "gruvbox-dark"
+light = "gruvbox-dark"
+
+# --- 1. FOLDER TEXT (Accent: Gruvbox Aqua) ---
+[filetype]
+prepend_rules = [
+    # Форсируем серый для служебной папки .npm и других скрытых директорий
+    { name = ".npm", fg = "#928374", bold = false },
+    { name = ".npm/", fg = "#928374", bold = false },
+    { name = ".cache", fg = "#928374", bold = false },
+    { name = ".ssh", fg = "#928374", bold = false },
+
+    # Акцентные папки пользователя
+    { name = "Downloads", fg = "#8ec07c", bold = true },
+    { name = "Documents", fg = "#8ec07c", bold = true },
+    { name = "Pictures", fg = "#8ec07c", bold = true },
+    { name = "Music", fg = "#8ec07c", bold = true },
+    { name = "Videos", fg = "#8ec07c", bold = true },
+    { name = "WORKSPASE", fg = "#8ec07c", bold = true },
+    { name = "Public", fg = "#8ec07c", bold = true },
+    { name = "PortProton", fg = "#8ec07c", bold = true },
+    { name = ".config", fg = "#8ec07c", bold = true },
+    { name = "Games", fg = "#8ec07c", bold = true },
+    
+    # Все остальные директории (общий фильтр)
+    { mime = "inode/directory", fg = "#928374" },
+    { if = "dir", fg = "#928374" }
+]
+
+# --- 2. FOLDER ICONS (With 'text' field) ---
+[icon]
+prepend_dirs = [
+    # Иконка для .npm (тоже серая)
+    { name = ".npm", text = "", fg = "#928374" },
+
+    # Акцентные иконки
+    { name = "Downloads", text = "󰉍", fg = "#8ec07c" },
+    { name = "Documents", text = "󰈙", fg = "#8ec07c" },
+    { name = "Pictures", text = "󰉏", fg = "#8ec07c" },
+    { name = "Music", text = "󰎆", fg = "#8ec07c" },
+    { name = "Videos", text = "󰕧", fg = "#8ec07c" },
+    { name = "WORKSPASE", text = "󰇄", fg = "#8ec07c" },
+    { name = "Public", text = "󰉐", fg = "#8ec07c" },
+    { name = ".config", text = "", fg = "#8ec07c" },
+    { name = "Games", text = "󰊴", fg = "#8ec07c" }
+]
+
+prepend_conds = [
+    # Стандартная иконка для всех прочих папок
+    { if = "dir", text = "", fg = "#928374" }
+]

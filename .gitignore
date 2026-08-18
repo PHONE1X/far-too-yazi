@@ -1,0 +1,9 @@
+# Backup files accumulated during development -- not meant to be tracked.
+*.bak
+*.bak-*
+*.prephase0
+_to_delete/
+
+# Editor/OS cruft
+.DS_Store
+*.swp

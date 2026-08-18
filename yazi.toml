@@ -1,0 +1,103 @@
+# кастомные настройки 
+[mgr]
+show_hidden = true
+ratio = [1, 4, 3]
+sort_by = "natural"
+sort_dir_first = true
+sort_reverse = true
+linemode = "size"
+
+# zip
+[[plugin.prepend_previewers]]
+mime = "application/{*zip,tar,bzip2,7z*,rar,xz,zstd,java-archive}"
+run  = "ouch"
+
+# git status (значки git у файлов в списке) — было в package.toml, но не установлено
+[[plugin.prepend_fetchers]]
+url   = "*"
+run   = "git"
+group = "git"
+
+[[plugin.prepend_fetchers]]
+url   = "*/"
+run   = "git"
+group = "git"
+
+[opener]
+play = [
+    { run = 'haruna "$@"', orphan = true, for = "unix" }
+]
+edit = [
+    { run = 'nvim "$@"', block = true, for = "unix" }
+]
+view = [
+    { run = 'gwenview "$@"', orphan = true, for = "unix" }
+]
+libredraw = [
+    { run = 'libreoffice --draw "$@"', orphan = true, for = "unix" }
+]
+librewriter = [
+    { run = 'libreoffice --writer "$@"', orphan = true, for = "unix" }
+]
+librecalc = [
+    { run = 'libreoffice --calc "$@"', orphan = true, for = "unix" }
+]
+libreimpress = [
+    { run = 'libreoffice --impress "$@"', orphan = true, for = "unix" }
+]
+portproton = [
+    { run = 'portproton "$@"', orphan = true, desc = "PortProton", for = "unix" }
+]
+extract = [
+    { run = 'ouch decompress "$@"', desc = "Ouch Extract", for = "unix" }
+]
+extract_7z = [
+    { run = '7z x "$@"', desc = "7z Extract (fallback)", for = "unix" }
+]
+open = [
+    { run = 'xdg-open "$@"', desc = "Open", for = "unix" }
+]
+
+okular = [
+    { run = 'okular "$@"', orphan = true, desc = "Okular", for = "unix" }
+]
+
+[open]
+prepend_rules = [
+    # 1. ПРИОРИТЕТ: EXE по расширению
+    { url = "*.{exe,EXE,msi,MSI,bat,lnk}", use = [ "portproton", "extract" ] },
+
+    # 2. EXE по MIME-типам
+    { mime = "application/microsoft.portable-executable", use = "portproton" },
+    { mime = "application/x-ms-dos-executable", use = "portproton" },
+    { mime = "application/x-msi", use = "portproton" },
+    { mime = "application/x-wine-extension-exe", use = "portproton" },
+
+    # 3. Изображения
+    { mime = "image/*", use = "view" },
+
+    # 4. Видео
+    { mime = "video/*", use = "play" },
+
+    # 5. Архивы: один явный экстрактор (ouch), без спорного выбора между несколькими опенерами.
+    # Раньше здесь стояли extract+portproton+open одновременно — Enter на архиве заставлял
+    # выбирать один из 4 вариантов. portproton тут был подстраховкой на случай, если архив
+    # на самом деле .exe/инсталлятор с обманчивым MIME — эта подстраховка уже покрыта
+    # правилом №1 выше (по расширению), так что тут она лишняя.
+    # Если ouch не справится с конкретным архивом — распакуй вручную: `:` → `7z x "$1"`,
+    # либо привяжи extract_7z к отдельному хоткею.
+    { mime = "application/{zip,tar,bzip2,7z*,rar,xz,zstd,java-archive}", use = "extract" },
+
+# 6. Офис и PDF
+    { mime = "application/pdf", use = "okular" },
+    { url = "*.{doc,docx,odt}", use = "librewriter" },
+    { url = "*.{xls,xlsx,ods}", use = "librecalc" },
+    { url = "*.{ppt,pptx,odp}", use = "libreimpress" },
+    # 7. Текст
+    { mime = "text/*", use = "edit" }
+]
+
+append_rules = [
+    # 8. Фоллбэк
+    { url = "*", use = "open" }
+]

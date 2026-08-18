@@ -1,0 +1,74 @@
+[[plugin.deps]]
+use = "ndtoan96/ouch"
+rev = "cfb9140"
+hash = "b5067143415bd2d46c0dfa57319ddcef"
+
+[[plugin.deps]]
+use = "dedukun/relative-motions"
+rev = "a603d9e"
+hash = "e02a788e5b8ae0fb47fd0193dda589cc"
+
+[[plugin.deps]]
+use = "KKV9/compress"
+rev = "c264639"
+hash = "e17c11b605d989568a1d1741ca17c584"
+
+[[plugin.deps]]
+use = "XYenon/clipboard"
+rev = "9089f90"
+hash = "e6efc609de1b617c7e8e98efd5286221"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:smart-enter"
+rev = "19dc890"
+hash = "56fdabc96fc1f4d53c96eb884b02a5be"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:mount"
+rev = "19dc890"
+hash = "4fccaaf10c36dc2466e2438a386ff017"
+
+[[plugin.deps]]
+use = "Sonico98/allmytoes"
+rev = "acdc53b"
+hash = "7bf0ed68a45144b28041affd2a334ff"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:git"
+rev = "19dc890"
+hash = "94081eed9bc9fe176715c33b0db55d35"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:full-border"
+rev = "19dc890"
+hash = "3996fc74044bc44144b323686f887e1"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:chmod"
+rev = "6047ce4"
+hash = "815dd20e682dec52bb92864037fa5f53"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:smart-paste"
+rev = "b224ddf"
+hash = "3f8d49413bc8691b4c652eb417a20178"
+
+[[plugin.deps]]
+use = "boydaihungst/restore"
+rev = "4eda0bf"
+hash = "778941e7f1ebbacd60f4e254bb3c51de"
+
+[[plugin.deps]]
+use = "uhs-robert/recycle-bin"
+rev = "fa68711"
+hash = "8714306b5cac6359edbacbf545fbd691"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:toggle-pane"
+rev = "b224ddf"
+hash = "4c0260feb50ea2437380690ffc241da7"
+
+[[flavor.deps]]
+use = "bennyyip/gruvbox-dark"
+rev = "619fdc5"
+hash = "d4c7003ec6dc4efd5d3a050d5c2f2575"
