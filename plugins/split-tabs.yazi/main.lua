@@ -331,41 +331,52 @@ local function spl_transfer(operation)
     -- paste silently auto-renames on a name collision, which is how F5/F6
     -- worked before this change. merge-paste asks Overwrite / Merge folders
     -- / Skip / Rename / Cancel per conflict (same prompt Shift+Insert already
-    -- gives you), which is what F5/F6 are expected to do too. Its ya.which()
-    -- prompt is an async, blocking-on-input call -- the tab_switch back to
-    -- src_pane right below fires immediately regardless (this emit is
-    -- fire-and-forget, same as the old "paste" call was), so on a conflict
-    -- the view may flip back to src while the prompt is still up. The
-    -- prompt itself still renders and captures the keypress correctly; it's
-    -- a cosmetic wrinkle, not a functional one -- worth revisiting if it
-    -- turns out to be more than that in practice.
-    ya.emit("plugin", { "merge-paste" })
-    ya.emit("tab_switch", { src_idx - 1 })
-    -- paste queues a background task and returns at once. By the time the
-    -- tab_switch above returns us to the source pane, the destination is no
-    -- longer the active tab, and this composited dual-pane view -- unlike
-    -- core yazi's single-pane redraw -- does not repaint on background task
-    -- completion for a tab that is not active.
+    -- gives you), which is what F5/F6 are expected to do too.
+    -- "cwd" forces merge-paste to target the destination pane's actual
+    -- directory instead of its default hover-aware smart-paste, which would
+    -- otherwise drop the file into whatever the destination pane's cursor
+    -- happens to be resting on (highlighted, not even opened) rather than
+    -- the directory itself. Confirmed: moving into a pane with a subfolder
+    -- merely highlighted silently moved the file into that subfolder.
+    ya.emit("plugin", { "merge-paste", "cwd" })
+    -- CONFIRMED BUG (was: "cosmetic wrinkle, not functional"; it is not
+    -- cosmetic): this used to switch back to the source pane on the very
+    -- next line, with zero delay. merge-paste's entry is async and doesn't
+    -- start reading cx.active (to decide where to paste) the instant this
+    -- "plugin" emit is queued -- it starts whenever yazi's scheduler gets
+    -- around to it. An immediate tab_switch back to src can win that race,
+    -- so cx.active is back to being the SOURCE pane by the time merge-paste
+    -- asks "where am I pasting" -- it then pastes into the same directory
+    -- it just copied from, not the other pane. Reproduced via F5/F6 in FAR
+    -- mode: pasting a file back onto itself immediately triggers merge-paste's
+    -- own "already exists at the destination" conflict prompt.
     --
-    -- A single immediate ui.render() only catches transfers that finish
-    -- before this line runs -- true for a quick local copy of a few small
-    -- files, false the moment the task takes any real time, or (in FAR
-    -- mode, where F5/F6 route through far-mode's far_copy/far_move, which
-    -- re-emits into this same function via an extra async "plugin" hop
-    -- before ever reaching this line) almost always false. There is no
-    -- single point in time guaranteed to be "after the task landed," so
-    -- poll with real delays instead -- same ya.async + pcall(ui.render)
-    -- pattern far-mode.yazi already uses for its mode-indicator chip.
-    -- Six renders over 1.5s covers typical local transfers; anything
-    -- slower still shows correctly once the user switches into the
-    -- destination pane manually, same fallback as before this fix.
-    ui.render()
+    -- Fix: give merge-paste a brief head start before switching back. This
+    -- is a delay, not a real synchronization guarantee, but it only needs to
+    -- outlast merge-paste's synchronous startup (reading cx.active), which
+    -- happens well under 150ms in practice -- nowhere near the multi-second
+    -- window a conflict prompt can stay open, which is fine to still race
+    -- (switching the view away while the prompt is up is genuinely cosmetic:
+    -- the prompt keeps working, it's just not on screen until you switch
+    -- back).
     ya.async(function()
+        ya.sleep(0.15)
+        ya.emit("tab_switch", { src_idx - 1 })
+        -- paste queues a background task and returns at once. By the time
+        -- the tab_switch above returns us to the source pane, the
+        -- destination is no longer the active tab, and this composited
+        -- dual-pane view -- unlike core yazi's single-pane redraw -- does
+        -- not repaint on background task completion for a tab that is not
+        -- active. Poll with real delays to catch it; six renders over 1.5s
+        -- covers typical local transfers, anything slower still shows
+        -- correctly once the user switches into the destination pane
+        -- manually.
         for _ = 1, 6 do
             ya.sleep(0.25)
             pcall(ui.render)
         end
     end)
+    ui.render()
 end
 
 local function spl_copy()

@@ -260,50 +260,28 @@ local FAR_ACTIONS = {
 	far_switch_pane = "spl_switch_tab",
 }
 
--- F5/F6 (far_copy/far_move) end in a full quit + relaunch, the same
--- mechanism to_far/to_vim already use to force a clean redraw, instead of
--- relying on split-tabs' repaint polling. Reasoning: split-tabs' own
--- ya.async poll (6 renders over 1.5s, see spl_transfer) already fixes the
--- common case, but a full relaunch is what the user actually asked for here
--- -- guaranteed-correct, at the cost of a visible reload flash each time.
+-- F5/F6 (far_copy/far_move) just dispatch straight to split-tabs' spl_copy
+-- / spl_move, same as every other dual-pane action here. No forced
+-- quit+relaunch after the transfer.
 --
--- SAFETY NOTE, load-bearing: quitting kills the WHOLE yazi process,
--- including anything still in flight -- an unfinished background copy, or
--- (via the merge-paste routing spl_transfer uses) an open Overwrite / Merge
--- / Skip / Rename prompt waiting on a keypress. There is no clean signal
--- available here for "the transfer, and any conflict prompt on it, has
--- fully finished" -- merge-paste is invoked as a fire-and-forget plugin
--- emit, not an awaitable call, so this can only wait a fixed delay and hope
--- it was enough. RELOAD_DELAY below is tuned for a quick local transfer
--- with at most one conflict the user answers promptly; a slow transfer, or
--- a conflict prompt left sitting unanswered past this delay, will get cut
--- off by the reload. If that turns out to bite in practice, the fix is to
--- stop firing merge-paste via emit and instead call its entry() directly
--- (via require(), which -- unlike @sync entry -- IS usable from inside an
--- ya.async block) so this can await real completion instead of guessing.
-local RELOAD_DELAY = 2.0
-
-local function schedule_reload_after_transfer()
-	local payload = capture_state()
-	ya.async(function()
-		log("reload: sleeping " .. RELOAD_DELAY .. "s before relaunch")
-		ya.sleep(RELOAD_DELAY)
-		write_state(payload)
-		local wrapped = write_sentinel()
-		if not wrapped then
-			log("reload: no `y` wrapper detected, cannot auto-relaunch")
-			ya.notify({
-				title = "far-mode",
-				content = "No `y` wrapper detected -- can't auto-reload after transfer.",
-				timeout = 6,
-			})
-			return
-		end
-		log("reload: emitting quit")
-		ya.emit("quit", {})
-	end)
-end
-
+-- REVERTED: an earlier version of this made F5/F6 end in a full quit +
+-- relaunch (same mechanism to_far/to_vim use) so the destination pane was
+-- guaranteed to repaint correctly. That depended on knowing when the
+-- transfer, and any merge-paste conflict prompt on it, had truly finished
+-- -- and there was no clean signal for that (merge-paste was fired as a
+-- fire-and-forget plugin emit). A fixed-delay guess routinely quit the
+-- process mid-prompt on a real conflict (merge-paste asks two sequential
+-- ya.which() prompts), which sometimes left dual-pane broken on relaunch
+-- (one pane stuck on "No items"). A follow-up attempt to make the call to
+-- merge-paste properly awaitable (via require() from inside ya.async) was
+-- also unreliable in testing and not worth the complexity right now.
+--
+-- Back to the simpler, boring behavior: split-tabs' own repaint poll (6
+-- renders over 1.5s, see spl_transfer in split-tabs.yazi) handles the
+-- common case, and the merge-paste conflict prompt still pops up and works
+-- correctly when there's a collision -- the user just needs to glance at
+-- (or switch to) the destination pane to see the result on a slower
+-- transfer, same as before dual-pane repaint was ever an issue.
 local function far_action(base, n)
 	local action = FAR_ACTIONS[base]
 	if not action then
@@ -313,9 +291,6 @@ local function far_action(base, n)
 
 	if dual_state() then
 		ya.emit("plugin", { "split-tabs", action })
-		if base == "far_copy" or base == "far_move" then
-			schedule_reload_after_transfer()
-		end
 		return
 	end
 

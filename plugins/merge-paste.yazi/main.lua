@@ -83,11 +83,24 @@ end
 -- convention as this config's smart-paste). The destination is resolved
 -- even when nothing is yanked, because the system-clipboard fallback needs
 -- it too.
-local get_paste_state = ya.sync(function()
+--
+-- force_cwd skips the "into the hovered directory" step and always targets
+-- the pane's own cwd. Needed by split-tabs' F5/F6 dual-pane transfer: it
+-- switches to the OTHER pane and pastes there, and that pane's cursor can
+-- be sitting on any folder the user last highlighted (not opened, just
+-- highlighted) -- with the default hover-aware behavior, the file silently
+-- lands inside whatever subfolder happens to be highlighted instead of the
+-- pane's actual directory. "Move to the other pane" should always mean the
+-- other pane's cwd, never wherever its cursor happens to rest. Ordinary
+-- paste bindings (Shift+Insert, "p") don't pass this and keep the original
+-- hover-aware smart-paste behavior.
+local get_paste_state = ya.sync(function(_, force_cwd)
 	local dest = cx.active.current.cwd
-	local hovered = cx.active.current.hovered
-	if hovered and hovered.cha and hovered.cha.is_dir then
-		dest = hovered.url
+	if not force_cwd then
+		local hovered = cx.active.current.hovered
+		if hovered and hovered.cha and hovered.cha.is_dir then
+			dest = hovered.url
+		end
 	end
 	dest = dest and tostring(dest) or nil
 
@@ -417,8 +430,8 @@ local function paste_one(is_cut, src, dest_dir, forced)
 	return ok, err, forced
 end
 
-local function paste()
-	local sources, is_cut, dest_dir = get_paste_state()
+local function paste(force_cwd)
+	local sources, is_cut, dest_dir = get_paste_state(force_cwd)
 	local from_clipboard = false
 
 	-- Nothing yanked inside Yazi? Fall back to whatever the desktop clipboard
@@ -499,7 +512,13 @@ local function paste()
 end
 
 return {
-	entry = function()
-		paste()
+	-- job.args[1] == "cwd" forces the pane's own directory as the paste
+	-- target, ignoring whatever's hovered (see get_paste_state above). Used
+	-- by split-tabs' F5/F6 dual-pane transfer; absent for ordinary paste
+	-- bindings, which keep the default hover-aware smart-paste behavior.
+	entry = function(_, job)
+		job = type(job) == "string" and { args = { job } } or job
+		local force_cwd = job and job.args and job.args[1] == "cwd"
+		paste(force_cwd)
 	end,
 }
