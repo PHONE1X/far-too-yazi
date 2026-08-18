@@ -233,5 +233,5 @@ versions):**
 
 ## License
 
-*(add your license of choice here — MIT is a common default for yazi
-plugins)*
+
+This project is licensed under the [MIT License](LICENSE).
