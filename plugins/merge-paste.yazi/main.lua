@@ -111,9 +111,14 @@ local get_paste_state = ya.sync(function(_, force_cwd)
 
 	local is_cut = yanked.is_cut and true or false
 
+	-- cx.yanked entries are File objects here (same shape as
+	-- cx.active.current.hovered above), not bare Urls -- tostring() on the
+	-- File itself gives Lua's default userdata repr ("File: 0x...") instead
+	-- of the path, which then reached `cp` as a literal argument and failed
+	-- with a stat error. .url is what actually stringifies to the path.
 	local sources = {}
-	for _, url in pairs(yanked) do
-		table.insert(sources, tostring(url))
+	for _, entry in pairs(yanked) do
+		table.insert(sources, tostring(entry.url or entry))
 	end
 
 	return sources, is_cut, dest

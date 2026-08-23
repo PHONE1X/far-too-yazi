@@ -1,5 +1,7 @@
 # far-too-yazi
 
+![Alt+M switches into FAR mode, F5 copies into the other pane and auto-activates dual-pane, a second F5 shows the conflict-aware Overwrite/Skip/Rename prompt](docs/demo.gif)
+
 A [yazi](https://yazi-rs.github.io/) config that adds a FAR Manager / Norton
 Commander style dual-pane mode on top of yazi's normal single-pane vim-style
 interface — with a single keystroke to swap between the two.
@@ -56,6 +58,16 @@ This project works around both:
   a disk this way can trigger your desktop's own password/keyring prompt —
   that's normal, it's the same authorization dialog a GUI file manager would
   show, not something this config adds on top.
+- **A config popup for file-type openers and startup state**
+  ([`openers.yazi`](plugins/openers.yazi)) — press `F` (or `Alt+F4` in FAR
+  mode) for a two-page popup: which program opens which extension (`a` add,
+  `e`/Enter edit, `d`/`x` delete), and a startup-settings page (keymap mode,
+  panel layout, hidden files, sort order — `Tab` switches page, `h`/`l` or
+  Enter/Space cycle a value). No hand-editing config files. This is also
+  what makes `smart-enter.yazi`'s Enter/`l` open files at all — yazi's own
+  `[opener]` table in `yazi.toml` doesn't drive Enter/l here, so
+  `smart-enter.yazi` was patched to read this popup's opener list instead
+  (see Credits).
 
 See [docs/FAR-MODE.md](docs/FAR-MODE.md) for the full module-by-module guide.
 
@@ -125,6 +137,7 @@ additions below). From inside yazi:
 | `t` | New workspace (when dual-pane is on) / new tab (when off) |
 | `Y` | Move selection to the other pane (dual-pane) / cancel yank (off) |
 | `Ctrl+Y` | Copy selection to the other pane (dual-pane only) |
+| `F` | Configure file-type openers / startup settings |
 
 FAR mode is always dual-pane. From inside yazi:
 
@@ -135,6 +148,7 @@ FAR mode is always dual-pane. From inside yazi:
 | `Tab` | Switch active pane |
 | `F2` / `F9` / `F11` | User menu / main menu / plugin commands |
 | `Alt+F10` | Fuzzy-jump to a folder (fzf) |
+| `Alt+F4` | Configure file-type openers / startup settings |
 
 Any transfer that collides with an existing name — F5, F6, `Y`, or
 `Ctrl+Y` — prompts Overwrite / Merge folders / Skip / Rename / Cancel,
@@ -205,6 +219,9 @@ it is blind copy-paste — forked/modified plugins are called out explicitly.
   machinery itself: keymap-swap/relaunch, F2/F9/F11 menus, Alt+F10 fuzzy
   folder jump. Written specifically for this project; see
   [docs/FAR-MODE.md](docs/FAR-MODE.md) for how they work.
+- [`openers.yazi`](plugins/openers.yazi) — `F` popup for configuring
+  file-type openers and startup state (keymap mode, panel layout, hidden
+  files, sort order) without hand-editing config files.
 
 **Forked and modified:**
 
@@ -212,6 +229,12 @@ it is blind copy-paste — forked/modified plugins are called out explicitly.
   originally by [Konstantin Tskhovrebov (terrakok)](https://github.com/terrakok/split-tabs).
   Modified here to fix a theme-rendering bug and a stale-working-directory
   bug on pane restore.
+- [`smart-enter.yazi`](plugins/smart-enter.yazi) — originally by
+  [yazi-rs](https://github.com/yazi-rs/plugins). Patched to read its
+  file-type → program mapping from `openers.yazi`'s popup/config instead of
+  yazi's own `[opener]` table (which doesn't drive Enter/`l` in this setup),
+  and to work around an opener arg-passing bug that broke opening images,
+  video, audio, PDFs, office docs, and archives.
 
 **Community plugins, used as published (see `package.toml` for pinned
 versions):**
@@ -219,7 +242,6 @@ versions):**
 - [`mount.yazi`](plugins/mount.yazi), [`git.yazi`](plugins/git.yazi),
   [`full-border.yazi`](plugins/full-border.yazi),
   [`chmod.yazi`](plugins/chmod.yazi),
-  [`smart-enter.yazi`](plugins/smart-enter.yazi),
   [`smart-paste.yazi`](plugins/smart-paste.yazi),
   [`toggle-pane.yazi`](plugins/toggle-pane.yazi) — [yazi-rs](https://github.com/yazi-rs/plugins)
 - [`compress.yazi`](plugins/compress.yazi) — [Ciarán O'Brien / KKV9](https://github.com/KKV9/compress)
