@@ -9,30 +9,43 @@
 -- right program directly via the Lua Command API and inlines the path, which
 -- sidesteps the broken arg-passing entirely.
 --
--- Keep this table in sync with [opener]/[open] in yazi.toml if you add a
--- new file type there.
-local IMAGE = { jpg=1, jpeg=1, png=1, gif=1, bmp=1, webp=1, svg=1, ico=1, tiff=1, tif=1, heic=1, avif=1 }
-local VIDEO = { mp4=1, mkv=1, webm=1, avi=1, mov=1, flv=1, wmv=1, m4v=1 }
-local AUDIO = { mp3=1, flac=1, wav=1, ogg=1, m4a=1, opus=1 }
-local ARCHIVE = { zip=1, tar=1, gz=1, bz2=1, ["7z"]=1, rar=1, xz=1, zst=1, jar=1 }
-local EXE = { exe=1, msi=1, bat=1, lnk=1 }
-local OFFICE = {
-	doc = "--writer", docx = "--writer", odt = "--writer",
-	xls = "--calc", xlsx = "--calc", ods = "--calc",
-	ppt = "--impress", pptx = "--impress", odp = "--impress",
+-- To change which program opens which file type, don't edit this file --
+-- pass an `openers` table to require("smart-enter"):setup{} in init.lua.
+-- See the commented example there. Anything with no matching extension
+-- falls back to `editor` (default "nvim").
+
+local DEFAULT_OPENERS = {
+	{ ext = { "jpg", "jpeg", "png", "gif", "bmp", "webp", "svg", "ico", "tiff", "tif", "heic", "avif" }, cmd = "gwenview" },
+	{ ext = { "mp4", "mkv", "webm", "avi", "mov", "flv", "wmv", "m4v" }, cmd = "haruna" },
+	{ ext = { "mp3", "flac", "wav", "ogg", "m4a", "opus" }, cmd = "mpv" },
+	{ ext = { "pdf" }, cmd = "okular" },
+	{ ext = { "doc", "docx", "odt" }, cmd = "libreoffice", args = { "--writer" } },
+	{ ext = { "xls", "xlsx", "ods" }, cmd = "libreoffice", args = { "--calc" } },
+	{ ext = { "ppt", "pptx", "odp" }, cmd = "libreoffice", args = { "--impress" } },
+	{ ext = { "zip", "tar", "gz", "bz2", "7z", "rar", "xz", "zst", "jar" }, cmd = "ouch", args = { "decompress" } },
+	{ ext = { "exe", "msi", "bat", "lnk" }, cmd = "portproton" },
 }
-local PDF = { pdf = 1 }
+
+local function build_lookup(openers)
+	local map = {}
+	for _, rule in ipairs(openers) do
+		for _, ext in ipairs(rule.ext) do
+			map[ext:lower()] = rule
+		end
+	end
+	return map
+end
 
 local function fail(cmd, err)
 	ya.notify({ title = "Open", content = string.format("Failed to launch %s: %s", cmd, tostring(err)), level = "error", timeout = 5 })
 end
 
-local function spawn(cmd, args)
-	local _, err = Command(cmd):arg(args):spawn()
-	if err then fail(cmd, err) end
+local function setup(self, opts)
+	opts = opts or {}
+	self.open_multi = opts.open_multi
+	self.editor = opts.editor or "nvim"
+	self.lookup = build_lookup(opts.openers or DEFAULT_OPENERS)
 end
-
-local function setup(self, opts) self.open_multi = opts.open_multi end
 
 local function entry(self)
 	local h = cx.active.current.hovered
@@ -46,28 +59,22 @@ local function entry(self)
 	local ext = h.name:match("%.([^.]+)$")
 	ext = ext and ext:lower() or ""
 	local path = tostring(h.url)
+	local lookup = self.lookup or build_lookup(DEFAULT_OPENERS)
+	local rule = lookup[ext]
 
-	if EXE[ext] then
-		spawn("portproton", { path })
-	elseif ARCHIVE[ext] then
-		local _, err = Command("ouch"):arg({ "decompress", path }):spawn()
-		if err then fail("ouch", err) end
-	elseif OFFICE[ext] then
-		spawn("libreoffice", { OFFICE[ext], path })
-	elseif PDF[ext] then
-		spawn("okular", { path })
-	elseif IMAGE[ext] then
-		spawn("gwenview", { path })
-	elseif VIDEO[ext] then
-		spawn("haruna", { path })
-	elseif AUDIO[ext] then
-		spawn("mpv", { path })
+	if rule then
+		local args = {}
+		for _, a in ipairs(rule.args or {}) do args[#args + 1] = a end
+		args[#args + 1] = path
+		local _, err = Command(rule.cmd):arg(args):spawn()
+		if err then fail(rule.cmd, err) end
 	else
-		-- treated as text: hand it to nvim via an inlined shell string,
+		-- treated as text: hand it to the editor via an inlined shell string,
 		-- since a blocking TUI editor needs yazi to release the terminal
 		-- (the "shell --block" mechanism handles that; direct Command:spawn()
 		-- would not).
-		ya.emit("shell", { "nvim " .. ya.quote(path), block = true })
+		local editor = self.editor or "nvim"
+		ya.emit("shell", { editor .. " " .. ya.quote(path), block = true })
 	end
 end
 
