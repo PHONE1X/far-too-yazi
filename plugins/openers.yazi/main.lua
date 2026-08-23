@@ -378,12 +378,10 @@ local function boot()
 		return
 	end
 
-	ya.async(function()
-		local out, cerr = Command("cat"):arg({ state_file }):output()
-		if cerr or not out or not out.stdout or out.stdout == "" then
-			set_panels(panels, false)
-		end
-	end)
+	local out, cerr = Command("cat"):arg({ state_file }):output()
+	if cerr or not out or not out.stdout or out.stdout == "" then
+		set_panels(panels, false)
+	end
 end
 
 --------------------------------------------------------------- popup shell
