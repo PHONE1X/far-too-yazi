@@ -9,10 +9,9 @@
 -- right program directly via the Lua Command API and inlines the path, which
 -- sidesteps the broken arg-passing entirely.
 --
--- To change which program opens which file type, don't edit this file --
--- pass an `openers` table to require("smart-enter"):setup{} in init.lua.
--- See the commented example there. Anything with no matching extension
--- falls back to `editor` (default "nvim").
+-- To change which program opens which file type, press F (see
+-- plugins/openers.yazi) instead of editing this file -- that popup edits
+-- the same data file this plugin reads below.
 
 local DEFAULT_OPENERS = {
 	{ ext = { "jpg", "jpeg", "png", "gif", "bmp", "webp", "svg", "ico", "tiff", "tif", "heic", "avif" }, cmd = "gwenview" },
@@ -25,6 +24,34 @@ local DEFAULT_OPENERS = {
 	{ ext = { "zip", "tar", "gz", "bz2", "7z", "rar", "xz", "zst", "jar" }, cmd = "ouch", args = { "decompress" } },
 	{ ext = { "exe", "msi", "bat", "lnk" }, cmd = "portproton" },
 }
+
+local function config_dir()
+	return os.getenv("YAZI_CONFIG_HOME") or (os.getenv("HOME") .. "/.config/yazi")
+end
+
+local function data_path()
+	return config_dir() .. "/openers-data.lua"
+end
+
+local function read_file(path)
+	local f = io.open(path, "r")
+	if not f then return nil end
+	local content = f:read("*a")
+	f:close()
+	return content
+end
+
+-- The data file (plugins/openers.yazi writes it) is plain Lua returning the
+-- same shape as DEFAULT_OPENERS above, so loading it is just running it.
+local function load_data_file(path)
+	local content = read_file(path)
+	if not content then return nil end
+	local chunk = load(content, "@" .. path)
+	if not chunk then return nil end
+	local ok, result = pcall(chunk)
+	if ok and type(result) == "table" then return result end
+	return nil
+end
 
 local function build_lookup(openers)
 	local map = {}
@@ -44,7 +71,6 @@ local function setup(self, opts)
 	opts = opts or {}
 	self.open_multi = opts.open_multi
 	self.editor = opts.editor or "nvim"
-	self.lookup = build_lookup(opts.openers or DEFAULT_OPENERS)
 end
 
 local function entry(self)
@@ -59,8 +85,8 @@ local function entry(self)
 	local ext = h.name:match("%.([^.]+)$")
 	ext = ext and ext:lower() or ""
 	local path = tostring(h.url)
-	local lookup = self.lookup or build_lookup(DEFAULT_OPENERS)
-	local rule = lookup[ext]
+	local openers = load_data_file(data_path()) or DEFAULT_OPENERS
+	local rule = build_lookup(openers)[ext]
 
 	if rule then
 		local args = {}

@@ -492,6 +492,12 @@ desc = "Archive selected files (password+header+level)"# }}}
 on  = "M"
 run = "plugin mount"# }}}
 
+#openers: which program opens which file type (Enter/l reads this list) {{{
+[[mgr.prepend_keymap]]
+on   = "F"
+run  = "plugin openers"
+desc = "Configure file-type openers"# }}}
+
 
 #КОПИРОВАНИЕ В СИСТЕМНЫЙ БУФЕР {{{
 [[mgr.prepend_keymap]]
