@@ -492,11 +492,13 @@ desc = "Archive selected files (password+header+level)"# }}}
 on  = "M"
 run = "plugin mount"# }}}
 
-#openers: which program opens which file type (Enter/l reads this list) {{{
+#openers + startup settings: which program opens which file type (Enter/l
+#reads this list), plus keymap mode / panels / hidden files / sort order
+#Yazi starts up in. Tab inside the popup switches between the two. {{{
 [[mgr.prepend_keymap]]
 on   = "F"
 run  = "plugin openers"
-desc = "Configure file-type openers"# }}}
+desc = "Configure file-type openers / startup settings"# }}}
 
 
 #КОПИРОВАНИЕ В СИСТЕМНЫЙ БУФЕР {{{

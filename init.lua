@@ -1,12 +1,14 @@
 
--- Какое приложение чем открывать (Enter / l).
+-- Какое приложение чем открывать (Enter / l), и в каком состоянии Yazi
+-- стартует (режим клавиш, число панелей, скрытые файлы, сортировка).
 -- Штатный [opener] в yazi.toml тут не работает (см. комментарий в
 -- plugins/smart-enter.yazi/main.lua) — Enter/l открывает файлы через
--- список из plugins/openers.yazi/main.lua. Чтобы поменять программу для
--- типа файлов, жми F в файловом менеджере (всплывающее окно: a — добавить,
--- e/Enter — изменить программу, d/x — удалить) — редактировать файлы руками
+-- список из plugins/openers.yazi/main.lua. Жми F в файловом менеджере:
+-- страница Openers (a — добавить, e/Enter — изменить программу, d/x —
+-- удалить) и страница Startup settings (Tab — переключить страницу,
+-- h/l или Enter/Space — переключить значение). Руками файлы редактировать
 -- не нужно. `editor` ниже — чем открывать всё, что не попало ни в одно
--- правило из этого окна.
+-- правило из окна Openers.
 require("smart-enter"):setup {
 	editor = "nvim",
 }
@@ -70,3 +72,8 @@ require("far-menu"):setup()
 
 -- far-mode: restore tab/cwd layout after a mode-swap relaunch, if any
 require("far-mode"):setup()
+
+-- Apply the saved "start in dual-pane" preference (plugins/openers.yazi),
+-- if any -- a no-op when it's "single" (the default) or when far-mode is
+-- about to restore a captured mode-swap session of its own.
+ya.emit("plugin", { "openers", "boot" })

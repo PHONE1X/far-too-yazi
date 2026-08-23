@@ -98,7 +98,7 @@ keymap = [
 	{ on = "<A-F8>",  run = "plugin fzf",          desc = "Jump to a file (fzf)" },
 	{ on = "<A-F10>", run = "plugin far-tree",     desc = "Find folder (directory tree)" },
 	{ on = "<A-F12>", run = "plugin zoxide",       desc = "Folder history (zoxide)" },
-	{ on = "<A-F4>",  run = "plugin openers",      desc = "Configure file-type openers" },
+	{ on = "<A-F4>",  run = "plugin openers",      desc = "Configure file-type openers / startup settings" },
 
 	# --------------------------- Panels ---------------------------
 	{ on = "<Tab>",   run = "plugin far-mode far_switch_pane", desc = "Switch to the other pane" },
