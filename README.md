@@ -2,23 +2,26 @@
 
 ![Alt+M switches into FAR mode, F5 copies into the other pane and auto-activates dual-pane, a second F5 shows the conflict-aware Overwrite/Skip/Rename prompt](docs/demo.gif)
 
-A [yazi](https://yazi-rs.github.io/) config that adds a FAR Manager / Norton
-Commander style dual-pane mode on top of yazi's normal single-pane vim-style
-interface — with a single keystroke to swap between the two.
+**far-too-yazi is a batteries-included [yazi](https://yazi-rs.github.io/)
+distro** — the same idea as [AstroNvim](https://astronvim.com/) for Neovim,
+but for yazi: clone it, run `./install.sh`, and you get a fully configured
+file manager with 23 plugins already wired together, sane defaults, and a
+built-in way to add more — no manual `package.toml` editing, no hunting
+plugin READMEs for keymap snippets to copy in by hand. It's aimed at people
+who want a file manager that already works, not a base to spend a weekend
+configuring.
 
-Stay in yazi's native vim-style keybindings for everyday browsing, or flip
-into a classic two-panel file-manager layout (F5 copy, F6 move, Tab to swap
-panels, conflict prompts on collisions) when you're moving files between
-directories. Both modes are full yazi keymaps, not an overlay — switching
-between them relaunches yazi with the other keymap loaded and your tabs,
-working directories, and dual-pane layout restored exactly as you left them.
-
-This isn't a single plugin — it's a full config distribution, the same idea
-as [AstroNvim](https://astronvim.com/) for Neovim: yazi itself (the Rust
-binary) is untouched, but this bundles a curated set of community plugins,
-several custom ones written specifically for this project, and a FAR
-Manager–style keymap and mode-switcher on top, all wired together into one
-install.
+On top of that, it adds a FAR Manager / Norton Commander style dual-pane
+mode on top of yazi's normal single-pane vim-style interface, with a single
+keystroke to swap between the two. Stay in yazi's native vim-style
+keybindings for everyday browsing, or flip into a classic two-panel
+file-manager layout (F5 copy, F6 move, Tab to swap panels, conflict prompts
+on collisions) when you're moving files between directories. Both modes are
+full yazi keymaps, not an overlay — switching between them relaunches yazi
+with the other keymap loaded and your tabs, working directories, and
+dual-pane layout restored exactly as you left them. The mode-switch relaunch
+works under **fish, bash, or zsh** — `install.sh` sets up whichever of those
+you have, so this isn't a fish-only build anymore.
 
 ## What's actually new here
 
@@ -60,14 +63,43 @@ This project works around both:
   show, not something this config adds on top.
 - **A config popup for file-type openers and startup state**
   ([`openers.yazi`](plugins/openers.yazi)) — press `F` (or `Alt+F4` in FAR
-  mode) for a two-page popup: which program opens which extension (`a` add,
-  `e`/Enter edit, `d`/`x` delete), and a startup-settings page (keymap mode,
-  panel layout, hidden files, sort order — `Tab` switches page, `h`/`l` or
-  Enter/Space cycle a value). No hand-editing config files. This is also
-  what makes `smart-enter.yazi`'s Enter/`l` open files at all — yazi's own
-  `[opener]` table in `yazi.toml` doesn't drive Enter/l here, so
-  `smart-enter.yazi` was patched to read this popup's opener list instead
-  (see Credits).
+  mode) for a two-page popup, no hand-editing config files for either page:
+  - **Openers page** — pick which program opens which file extension
+    (`a` add, `e`/Enter edit, `d`/`x` delete). This is what actually decides
+    what `Enter`/`l` open a file with in this build.
+  - **Startup settings page** — the yazi state you want *every* launch to
+    start in, persisted so it survives restarts: keymap mode (vim/FAR),
+    panel layout (single / dual / dual+preview), hidden files, sort field,
+    folders-first, reverse-sort. `Tab` switches between the two pages;
+    `h`/`l` or Enter/Space cycle a value on the settings page.
+
+  Fixed recently: opening a file used to launch the right program but hand
+  it no file to open (a blank editor, an empty player) — an argument-passing
+  bug in how the opener command was built. Openers now actually open the
+  file you picked, not just the program. This is also what makes
+  `smart-enter.yazi`'s Enter/`l` open files at all — yazi's own `[opener]`
+  table in `yazi.toml` doesn't drive Enter/l here, so `smart-enter.yazi` was
+  patched to read this popup's opener list instead (see Credits).
+- **A plugin browser and installer** ([`plugin-manager.yazi`](plugins/plugin-manager.yazi)) —
+  `Alt+P` opens a full-window popup (same style as the `F` popup above)
+  listing yazi plugins with a description for each: `j`/`k` to move,
+  `/` to filter, `Enter`/`i` to install the highlighted one straight into
+  your yazi install via `ya pkg add`. It isn't limited to a hand-picked
+  shortlist — press `r` inside the popup to pull the live list of 100+
+  plugins tagged `topic:yazi-plugin` on GitHub (needs `curl`+`jq`; falls
+  back to the bundled list if either is missing or the network doesn't
+  answer in time).
+- **Drag-and-drop** — `Alt+D` (vim) / `Alt+F6` (FAR) drags the selection out
+  to another app; `Alt+I` (vim) / `Alt+F3` (FAR) accepts a drop of files
+  from another app into the current directory. kitty (0.47.1+) and iTerm2
+  (3.7.0 beta10+) support yazi's native DnD protocol for the drag-out
+  direction with no binding needed at all — the bindings here exist for
+  every other terminal, via [`dragon`](https://github.com/mwh/dragon) (AUR:
+  `dragon-drag-and-drop` — not the KDE media player of the same name in the
+  official repos) as the drag source / drop target.
+- **The installer checks for yazi itself** — if `yazi` isn't already on
+  `PATH`, `install.sh` installs it (pacman/brew/apt→cargo fallback) before
+  touching any config.
 
 See [docs/FAR-MODE.md](docs/FAR-MODE.md) for the full module-by-module guide.
 
@@ -90,9 +122,11 @@ Two separate things, don't confuse them:
 
 - [yazi](https://yazi-rs.github.io/) 26.5.6 or newer (uses `@sync` entries
   and `Tab.layout`/`Tab.build` patching — older versions may not have these).
-- [fish shell](https://fishshell.com/) for the mode-switch relaunch wrapper.
-  **This is the one hard dependency right now** — see
-  [Limitations](#limitations) below if you're on bash/zsh.
+  `install.sh` installs it for you if it isn't already on `PATH`.
+- **fish, bash, or zsh** for the mode-switch relaunch wrapper (`y`).
+  `install.sh` detects which of these you have and installs the matching
+  wrapper(s) — `fish/y.fish` or `bash/y.sh` (sourced from `.bashrc`/
+  `.zshrc`, works under both bash and zsh).
 - [`fzf`](https://github.com/junegunn/fzf) for the Alt+F10 folder jump; `fd`
   if you have it (falls back to `find`).
 - `gh` (GitHub CLI) is *not* required to use this — only mentioned here
@@ -138,6 +172,9 @@ additions below). From inside yazi:
 | `Y` | Move selection to the other pane (dual-pane) / cancel yank (off) |
 | `Ctrl+Y` | Copy selection to the other pane (dual-pane only) |
 | `F` | Configure file-type openers / startup settings |
+| `Alt+D` | Drag-and-drop the selection out (kitty/iTerm2: native; other terminals: via `dragon`) |
+| `Alt+I` | Drag-and-drop files in from another app (via `dragon`) |
+| `Alt+P` | Browse and install yazi plugins |
 
 FAR mode is always dual-pane. From inside yazi:
 
@@ -149,6 +186,9 @@ FAR mode is always dual-pane. From inside yazi:
 | `F2` / `F9` / `F11` | User menu / main menu / plugin commands |
 | `Alt+F10` | Fuzzy-jump to a folder (fzf) |
 | `Alt+F4` | Configure file-type openers / startup settings |
+| `Alt+F6` | Drag-and-drop the selection out (kitty/iTerm2: native; other terminals: via `dragon`) |
+| `Alt+F3` | Drag-and-drop files in from another app (via `dragon`) |
+| `Alt+P` | Browse and install yazi plugins |
 
 Any transfer that collides with an existing name — F5, F6, `Y`, or
 `Ctrl+Y` — prompts Overwrite / Merge folders / Skip / Rename / Cancel,
@@ -160,12 +200,14 @@ Full keybinding reference and the reasoning behind each module:
 
 ## Limitations
 
-- **fish-only mode switching.** The relaunch wrapper (`y`) is a fish
-  function. Porting it to bash/zsh is straightforward (it's ~50 lines, no
-  fish-specific logic beyond syntax) but hasn't been done — see
-  [Roadmap](#roadmap). Without it you can still use either keymap directly
-  by symlinking `keymap.toml` yourself; you just lose the relaunch-on-switch
-  convenience.
+- **Drag-and-drop needs a terminal that supports it, or `dragon`.** Only
+  kitty (0.47.1+) and iTerm2 (3.7.0 beta10+) implement yazi's native DnD
+  protocol so far; `Alt+D`/`Alt+F6` (out) and `Alt+I`/`Alt+F3` (in) fall
+  back to launching `dragon` (AUR: `dragon-drag-and-drop`) everywhere else,
+  which needs to be installed separately.
+- **The plugin manager's live GitHub fetch (`r`) needs `curl` and `jq`.**
+  Without them, or if the network doesn't answer, it just keeps the
+  bundled 25-plugin catalog — nothing breaks, the catalog is just shorter.
 - **Dual-pane workspaces are 2 panes each**, not N. See Roadmap.
 - **Only the active workspace survives a mode-switch relaunch** if you're
   running a build with multiple dual-pane workspaces — background ones
@@ -192,8 +234,6 @@ Not implemented yet, tracked here so it doesn't get lost:
   — the current compositor is hardcoded to exactly 2 panes; extending it to
   a configurable pane count is mostly a data-model change
   (`split-tabs.yazi`'s pane tracking assumes exactly 2 throughout).
-- **A non-fish version of the `y` wrapper**, so mode-switching doesn't
-  require fish specifically.
 - **Tabbed FAR mode** — a visible tab strip in FAR mode showing which
   workspace is active, once multi-workspace support exists.
 
@@ -222,6 +262,9 @@ it is blind copy-paste — forked/modified plugins are called out explicitly.
 - [`openers.yazi`](plugins/openers.yazi) — `F` popup for configuring
   file-type openers and startup state (keymap mode, panel layout, hidden
   files, sort order) without hand-editing config files.
+- [`plugin-manager.yazi`](plugins/plugin-manager.yazi) — `Alt+P` popup
+  listing a curated catalog of yazi plugins with descriptions; installs
+  the picked one via `ya pkg add`.
 
 **Forked and modified:**
 

@@ -4,6 +4,39 @@ Notable changes to this config distribution. Grouped by the day the work
 landed rather than version tags, since this isn't released as a versioned
 package.
 
+## 2026-08-24 (later)
+
+### Added
+
+- Multi-shell mode-switching: `bash/y.sh` ports the `y` relaunch wrapper
+  (previously fish-only) to bash and zsh, same protocol
+  (`YAZI_RESTART_FILE`/`YAZI_STATE_FILE`/`YAZI_KEYMAP_MODE`) as
+  `far-mode.yazi` already expects. `install.sh` now detects whichever of
+  fish/bash/zsh are present and installs the matching wrapper(s) instead
+  of only checking for fish.
+- `install.sh` now checks whether `yazi` itself is installed and installs
+  it (pacman/brew/apt→cargo/cargo fallback chain) before configuring
+  anything, instead of assuming it's already on `PATH`.
+- Drag-and-drop, out: `<A-d>` (vim keymap) / `<A-F6>` (FAR keymap) runs
+  `dragon -x -i -T %h` on the selection. kitty and iTerm2 support yazi's
+  native DnD protocol directly (no binding needed — drag straight out of
+  the window); everywhere else needs `dragon` (AUR: `dragon-drag-and-drop`
+  — not the KDE media player of the same name in the official repos) as
+  the drag source.
+- Drag-and-drop, in: `<A-i>` (vim keymap) / `<A-F3>` (FAR keymap) runs
+  `dragon --target --and-exit`, copying whatever's dropped on it into the
+  current directory. The earlier `dragon -x -i -T` binding only covers
+  dragging a selection *out* — it has no drop-target mode, so bringing
+  files in needed this separate binding.
+- `plugin-manager.yazi`: new plugin, `<A-p>` in both keymaps, rebuilt as a
+  full-window popup (same style as `openers.yazi`'s `F` popup) instead of
+  a single-page `ya.which` list. Lists a bundled 25-plugin catalog
+  (official `yazi-rs/plugins` set plus the community plugins already
+  vetted for this project); press `r` inside the popup to merge in a live
+  pull of the 100+ repos tagged `topic:yazi-plugin` on GitHub (needs
+  `curl`+`jq`, falls back to the bundled list otherwise). `/` filters,
+  `Enter`/`i` installs the highlighted entry via `ya pkg add`.
+
 ## 2026-08-24
 
 ### Fixed

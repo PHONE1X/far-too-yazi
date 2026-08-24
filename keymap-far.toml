@@ -99,6 +99,13 @@ keymap = [
 	{ on = "<A-F10>", run = "plugin far-tree",     desc = "Find folder (directory tree)" },
 	{ on = "<A-F12>", run = "plugin zoxide",       desc = "Folder history (zoxide)" },
 	{ on = "<A-F4>",  run = "plugin openers",      desc = "Configure file-type openers / startup settings" },
+	{ on = "<A-p>",   run = "plugin plugin-manager", desc = "Browse and install yazi plugins" },
+	# kitty/iTerm2 have drag-and-drop built into the terminal itself (no
+	# binding needed). Everywhere else needs an external helper -- `dragon`
+	# (AUR: dragon-drag-and-drop, NOT the KDE media player of the same name
+	# in the official repos) opens a drop target window for the selection.
+	{ on = "<A-F6>",  run = "shell -- dragon -x -i -T %h", desc = "Drag-and-drop selection out (needs dragon-drag-and-drop, AUR)" },
+	{ on = "<A-F3>",  run = 'shell -- dragon --target --and-exit | while IFS= read -r f; do [ -e "$f" ] && cp -r -- "$f" .; done', desc = "Drag-and-drop files in (needs dragon-drag-and-drop, AUR)" },
 
 	# --------------------------- Panels ---------------------------
 	{ on = "<Tab>",   run = "plugin far-mode far_switch_pane", desc = "Switch to the other pane" },

@@ -492,6 +492,21 @@ desc = "Archive selected files (password+header+level)"# }}}
 on  = "M"
 run = "plugin mount"# }}}
 
+#drag-and-drop: kitty/iTerm2 have this built into the terminal itself (no
+#binding needed, drag the file straight out of the window). Everywhere
+#else needs an external helper -- `dragon` (AUR: dragon-drag-and-drop, NOT
+#the KDE media player of the same name in the official repos) opens a drop
+#target window you can drag the selection into. {{{
+[[mgr.prepend_keymap]]
+on   = "<A-d>"
+run  = "shell -- dragon -x -i -T %h"
+desc = "Drag-and-drop selection out (needs dragon-drag-and-drop, AUR)"
+
+[[mgr.prepend_keymap]]
+on   = "<A-i>"
+run  = 'shell -- dragon --target --and-exit | while IFS= read -r f; do [ -e "$f" ] && cp -r -- "$f" .; done'
+desc = "Drag-and-drop files in (needs dragon-drag-and-drop, AUR)"# }}}
+
 #openers + startup settings: which program opens which file type (Enter/l
 #reads this list), plus keymap mode / panels / hidden files / sort order
 #Yazi starts up in. Tab inside the popup switches between the two. {{{
@@ -499,6 +514,13 @@ run = "plugin mount"# }}}
 on   = "F"
 run  = "plugin openers"
 desc = "Configure file-type openers / startup settings"# }}}
+
+#plugin manager: browse a curated catalog with descriptions, install the
+#picked one via `ya pkg add` {{{
+[[mgr.prepend_keymap]]
+on   = "<A-p>"
+run  = "plugin plugin-manager"
+desc = "Browse and install yazi plugins"# }}}
 
 
 #КОПИРОВАНИЕ В СИСТЕМНЫЙ БУФЕР {{{
