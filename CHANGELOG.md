@@ -32,10 +32,11 @@ package.
   full-window popup (same style as `openers.yazi`'s `F` popup) instead of
   a single-page `ya.which` list. Lists a bundled 25-plugin catalog
   (official `yazi-rs/plugins` set plus the community plugins already
-  vetted for this project); press `r` inside the popup to merge in a live
+  vetted for this project); on open it automatically merges in a live
   pull of the 100+ repos tagged `topic:yazi-plugin` on GitHub (needs
-  `curl`+`jq`, falls back to the bundled list otherwise). `/` filters,
-  `Enter`/`i` installs the highlighted entry via `ya pkg add`.
+  `curl`+`jq`, silently falls back to the bundled list otherwise -- `r`
+  retries). `/` filters, `Enter`/`i` installs the highlighted entry via
+  `ya pkg add`.
 
 ## 2026-08-24
 

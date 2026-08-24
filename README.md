@@ -85,10 +85,11 @@ This project works around both:
   listing yazi plugins with a description for each: `j`/`k` to move,
   `/` to filter, `Enter`/`i` to install the highlighted one straight into
   your yazi install via `ya pkg add`. It isn't limited to a hand-picked
-  shortlist — press `r` inside the popup to pull the live list of 100+
-  plugins tagged `topic:yazi-plugin` on GitHub (needs `curl`+`jq`; falls
-  back to the bundled list if either is missing or the network doesn't
-  answer in time).
+  shortlist — on open it automatically pulls the live list of 100+ repos
+  tagged `topic:yazi-plugin` on GitHub and merges it with the bundled
+  baseline (needs `curl`+`jq`; silently falls back to just the bundled
+  list if either is missing or the network doesn't answer in time — press
+  `r` inside the popup to retry).
 - **Drag-and-drop** — `Alt+D` (vim) / `Alt+F6` (FAR) drags the selection out
   to another app; `Alt+I` (vim) / `Alt+F3` (FAR) accepts a drop of files
   from another app into the current directory. kitty (0.47.1+) and iTerm2

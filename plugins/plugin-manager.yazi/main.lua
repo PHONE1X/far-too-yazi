@@ -244,7 +244,7 @@ local function status_line(catalog, filter, live_count)
 	if live_count then
 		parts[#parts + 1] = live_count .. " from GitHub (topic:yazi-plugin)"
 	else
-		parts[#parts + 1] = "press r to fetch more from GitHub"
+		parts[#parts + 1] = "press r to retry the GitHub fetch"
 	end
 	return table.concat(parts, "  |  ")
 end
@@ -296,11 +296,34 @@ function M:run_modal()
 	return action
 end
 
-function M:entry()
-	local catalog = merge_catalog(nil)
-	set_state(catalog, nil)
+-- Shared by the auto-fetch on open and the manual `r` refresh. Runs before
+-- the modal is shown (auto-fetch) or with it hidden (run_modal already
+-- toggled it off for "refresh", same as "install"/"filter") so a slow
+-- network call never happens underneath a redraw loop.
+local function do_refresh(silent)
+	if not silent then
+		ya.notify { title = "plugin-manager", content = "Fetching plugin list from GitHub...", timeout = 3 }
+	end
+	local live = fetch_live()
+	local cat, filter = get_state()
+	if live then
+		set_state(merge_catalog(live), filter, #live)
+	elseif not silent then
+		ya.notify {
+			title = "plugin-manager",
+			content = "Fetch failed (offline, or curl/jq missing) -- keeping the bundled list.",
+			timeout = 6,
+			level = "warn",
+		}
+	end
+end
 
-	local live_count = nil
+function M:entry()
+	set_state(merge_catalog(nil), nil)
+	-- Auto-fetch once on open so Alt+P shows the full live catalog by
+	-- default, not just the bundled baseline; `r` still re-fetches later.
+	do_refresh(true)
+
 	while true do
 		local action = self:run_modal()
 		if action == "install" then
@@ -312,21 +335,7 @@ function M:entry()
 				set_state(cat, needle)
 			end
 		elseif action == "refresh" then
-			ya.notify { title = "plugin-manager", content = "Fetching plugin list from GitHub...", timeout = 3 }
-			local live = fetch_live()
-			if live then
-				live_count = #live
-				local cat, filter = get_state()
-				local merged = merge_catalog(live)
-				set_state(merged, filter)
-			else
-				ya.notify {
-					title = "plugin-manager",
-					content = "Fetch failed (offline, or curl/jq missing) -- keeping the bundled list.",
-					timeout = 6,
-					level = "warn",
-				}
-			end
+			do_refresh(false)
 		else
 			return
 		end
