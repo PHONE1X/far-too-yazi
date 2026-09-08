@@ -172,6 +172,53 @@ folders under here and let me pick one" — a fuzzy picker over a directory
 list covers that. Uses `fzf` (required); `fd` if present, `find` as a
 fallback. Three modes: current directory, `$HOME`, or `/`.
 
+### `far-bookmarks.yazi` — folder shortcuts
+
+FAR Manager's folder shortcuts (Total Commander calls the same thing the
+directory hotlist): a hand-built list of directories, each carrying a
+one-character key. `` ` `` / `Ctrl+D` opens the list, `'` / `Alt+F11` is
+the keypress-only jump menu, `Alt+B` pins the current directory.
+
+The list is stored as `bookmarks-data.lua` in the config directory, in the
+same "plain Lua table returned from a file" format `openers.yazi` uses for
+`openers-data.lua` — `load()`ing a Lua table beats shipping a JSON parser,
+and it leaves the file readable and hand-editable. Malformed entries are
+dropped at load time rather than allowed to crash the popup later, when
+there is no good place left to report the problem.
+
+The popup is the same shape as `openers.yazi`'s: a `Modal` child rendered
+by `redraw()`, driven by a `ya.which`/`ya.chan` producer-consumer pair. The
+reason for that structure is `ya.input`: it needs the keyboard focus the
+popup's own key loop is holding, so any action that prompts for text
+(add, rename, change key) has to exit the modal loop first and be run by
+the caller. `ya.join` returning is what guarantees nothing is still
+listening for keys at that point.
+
+Two deliberate behaviours worth knowing:
+
+- **`add` bookmarks the directory the panel is in, never the hovered one.**
+  A separate `add hovered` (`A` in the popup) exists for that. This mirrors
+  the lesson from `smart-paste`, which was dropped because a command that
+  silently retargets itself at whatever the cursor is on is a command you
+  cannot predict.
+- **The seed runs once.** If no data file exists at all, the first
+  invocation writes a starter list of gaming directories that actually
+  exist on the machine — the Steam library, the Proton prefixes, the
+  PortProton prefixes, the installed Proton builds — trying the native,
+  Flatpak and `~/.steam` layouts for each. A file that exists but is empty
+  is a deliberate "I deleted them all" and is left alone.
+
+One yazi API detail this plugin ran into, worth recording because it bites
+silently: **a plugin invoked with two bare words gets only the first.**
+`plugin far-bookmarks add hovered` arrives as `args = { "add" }`, not
+`{ "add", "hovered" }`. The `--` separator is what makes yazi split the
+rest into real arguments (`plugin far-bookmarks -- add hovered`), which is
+the same form the vendored plugins already use for their flags
+(`plugin restore -- --interactive`). From Lua, `ya.emit("plugin", {...})`
+follows the same rule: the second table element is the whole argument
+string, so it is `{ "far-bookmarks", "add hovered" }` — passing three
+elements drops the third. `far-menu.yazi` had exactly this bug.
+
 ### `ucp.yazi` — universal copy/paste
 
 Handles copy/paste across more than just files — images (to/from the

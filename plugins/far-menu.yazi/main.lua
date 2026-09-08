@@ -2,7 +2,8 @@
 -- far-menu.yazi -- FAR Manager's menus for yazi.
 --
 --   F2  -> "user"    the user menu
---   F9  -> "main"    the menu bar (with "view", "sort", "panel" sub-menus)
+--   F9  -> "main"    the menu bar (with "view", "sort", "panel" and
+--                     "bookmarks" sub-menus)
 --   F11 -> "plugins" plugin commands
 --
 -- Entries are plain data, so overriding them from init.lua needs no code:
@@ -34,6 +35,7 @@ end
 local DEFAULTS = {}
 
 DEFAULTS.user = {
+	{ on = "f", desc = "Bookmarked folders",          cmd = "plugin", args = { "far-bookmarks" } },
 	{ on = "s", desc = "Send to phone (KDE Connect)", cmd = "plugin", args = { "kdeconnect", "send" } },
 	{ on = "p", desc = "Browse phone (KDE Connect)",  cmd = "plugin", args = { "kdeconnect", "browse" } },
 	{ on = "a", desc = "Archive selected files",      cmd = "plugin", args = { "compress" } },
@@ -53,6 +55,7 @@ DEFAULTS.main = {
 	{ on = "p", desc = "Panels",                 menu = "panel" },
 	{ on = "h", desc = "Show / hide hidden files", cmd = "hidden", args = { "toggle" } },
 	{ on = "f", desc = "Filter the panel",       cmd = "filter", args = { smart = true } },
+	{ on = "b", desc = "Bookmarked folders",     menu = "bookmarks" },
 	{ on = "w", desc = "Task manager",           cmd = "tasks:show" },
 	{ on = "k", desc = "Keyboard help",          cmd = "help" },
 	{ on = "u", desc = "User menu",              menu = "user" },
@@ -92,9 +95,25 @@ DEFAULTS.panel = {
 	{ on = "c", desc = "Close this tab",              cmd = "close" },
 }
 
+-- Every entry here is one of far-bookmarks' own commands. The pinned
+-- folders themselves are NOT mirrored into this table -- they live in
+-- bookmarks-data.lua and are read fresh each time, so a folder pinned a
+-- second ago is reachable without touching this file.
+DEFAULTS.bookmarks = {
+	{ on = "j", desc = "Jump to a bookmark (one keypress)", cmd = "plugin", args = { "far-bookmarks", "jump" } },
+	{ on = "l", desc = "Open the bookmark list",            cmd = "plugin", args = { "far-bookmarks" } },
+	{ on = "a", desc = "Bookmark the current directory",    cmd = "plugin", args = { "far-bookmarks", "add" } },
+	-- "add hovered" is ONE argument string, not two. yazi hands the plugin
+	-- everything after the plugin name as a single argument and splits it
+	-- itself; passing { "far-bookmarks", "add", "hovered" } silently drops
+	-- "hovered" and quietly bookmarks the wrong folder.
+	{ on = "h", desc = "Bookmark the hovered folder",       cmd = "plugin", args = { "far-bookmarks", "add hovered" } },
+}
+
 DEFAULTS.plugins = {
 	{ on = "f", desc = "Jump to a file (fzf)",        cmd = "plugin", args = { "fzf" } },
 	{ on = "z", desc = "Jump to a directory (zoxide)", cmd = "plugin", args = { "zoxide" } },
+	{ on = "d", desc = "Bookmarked folders",          cmd = "plugin", args = { "far-bookmarks" } },
 	{ on = "t", desc = "Find folder (tree)",          cmd = "plugin", args = { "far-tree" } },
 	{ on = "a", desc = "Archive selected files",      cmd = "plugin", args = { "compress" } },
 	{ on = "m", desc = "Drives / mount points",       cmd = "plugin", args = { "mount" } },

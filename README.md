@@ -49,7 +49,8 @@ This project works around both:
   shows up in that pane's listing immediately — the target pane wasn't
   always refreshing after a cross-pane transfer landed.
 - **FAR Manager conveniences**: F2/F9/F11 menus (`far-menu.yazi`), Alt+F10
-  fuzzy folder jump (`far-tree.yazi`).
+  fuzzy folder jump (`far-tree.yazi`), folder shortcuts
+  (`far-bookmarks.yazi`, below).
 - **Phone browsing over KDE Connect** ([`kdeconnect.yazi`](plugins/kdeconnect.yazi)) —
   mount a paired phone and `cd` straight into it, or send files to it,
   without leaving yazi. A thin wrapper around `kdeconnect-cli --mount`,
@@ -90,6 +91,24 @@ This project works around both:
   baseline (needs `curl`+`jq`; silently falls back to just the bundled
   list if either is missing or the network doesn't answer in time — press
   `r` inside the popup to retry).
+- **Bookmarked folders** ([`far-bookmarks.yazi`](plugins/far-bookmarks.yazi)) —
+  FAR Manager's folder shortcuts: a list of the directories you keep coming
+  back to, each with a one-character key, so any of them is two keystrokes
+  away. `` ` `` (vim) / `Ctrl+D` (FAR) opens the list to manage it, `'`
+  (vim) / `Alt+F11` (FAR) is the one-keypress jump menu, and `Alt+B` pins
+  whatever directory the panel is currently in. Inside the list: Enter to
+  go, `t` to open it in a new tab, `a` to pin the current folder, `A` the
+  hovered one, `r` rename, `s` change the key, `d` delete, `J`/`K` reorder.
+  `zoxide` (`Alt+F12`) and `fzf` cover the same ground by guessing from
+  history — this list only ever holds what you put in it, which is what you
+  want for the handful of folders you open every day.
+
+  The list lives in `bookmarks-data.lua` next to your other yazi config, as
+  a plain Lua table you can hand-edit or check into git. On the very first
+  run it is seeded with the gaming folders nobody enjoys retyping — the
+  Steam library, the Proton prefixes, the PortProton prefixes, the
+  installed Proton builds — skipping any that don't exist on your machine.
+  That happens once; after that the list is entirely yours.
 - **Drag-and-drop** — `Alt+D` (vim) / `Alt+F6` (FAR) drags the selection out
   to another app; `Alt+I` (vim) / `Alt+F3` (FAR) accepts a drop of files
   from another app into the current directory. kitty (0.47.1+) and iTerm2
@@ -175,6 +194,9 @@ additions below). From inside yazi:
 | `p` | Paste into the current directory, asks on name conflicts (never jumps into a hovered folder) |
 | `Alt+Y` | Paste into the hovered folder if one is highlighted, asks on name conflicts (falls back to the current directory otherwise) |
 | `F` | Configure file-type openers / startup settings |
+| `` ` `` | Bookmarked folders — the list, to add / jump / rename / delete |
+| `'` | Jump to a bookmarked folder with one keypress |
+| `Alt+B` | Bookmark the current directory |
 | `Alt+D` | Drag-and-drop the selection out (kitty/iTerm2: native; other terminals: via `dragon`) |
 | `Alt+I` | Drag-and-drop files in from another app (via `dragon`) |
 | `Alt+P` | Browse and install yazi plugins |
@@ -188,6 +210,9 @@ FAR mode is always dual-pane. From inside yazi:
 | `Tab` | Switch active pane |
 | `F2` / `F9` / `F11` | User menu / main menu / plugin commands |
 | `Alt+F10` | Fuzzy-jump to a folder (fzf) |
+| `Ctrl+D` | Folder shortcuts — the list, to add / jump / rename / delete |
+| `Alt+F11` | Jump to a bookmarked folder with one keypress |
+| `Alt+B` | Bookmark the current directory |
 | `Alt+F4` | Configure file-type openers / startup settings |
 | `Alt+F6` | Drag-and-drop the selection out (kitty/iTerm2: native; other terminals: via `dragon`) |
 | `Alt+F3` | Drag-and-drop files in from another app (via `dragon`) |
@@ -217,17 +242,11 @@ Full keybinding reference and the reasoning behind each module:
   aren't restored (their underlying tabs aren't lost, just their pane
   layout). Not an issue in this release, since workspaces (plural) aren't
   shipped here yet — noted for when they land.
-- **No bookmarks / fast-travel yet.** See Roadmap.
 
 ## Roadmap
 
 Not implemented yet, tracked here so it doesn't get lost:
 
-- **Bookmarks / fast-travel for FAR mode** — vim-mode navigation in yazi
-  already has quick jump shortcuts; FAR mode has nothing equivalent yet.
-  Needs a way to save a directory under a key and jump straight to it,
-  Norton-Commander/FAR style, instead of navigating there by hand every
-  time.
 - **Port more of FAR mode's logic into vim-mode**, including parts of its
   control scheme, where it doesn't conflict with yazi's own vim-style
   bindings — right now the two modes share less than they could.
@@ -258,9 +277,10 @@ it is blind copy-paste — forked/modified plugins are called out explicitly.
   "not planned" upstream.
 - [`kdeconnect.yazi`](plugins/kdeconnect.yazi) — browse and send files to a
   KDE Connect–paired phone.
-- `far-mode.yazi`, `far-menu.yazi`, `far-tree.yazi` — the FAR-mode
-  machinery itself: keymap-swap/relaunch, F2/F9/F11 menus, Alt+F10 fuzzy
-  folder jump. Written specifically for this project; see
+- `far-mode.yazi`, `far-menu.yazi`, `far-tree.yazi`,
+  `far-bookmarks.yazi` — the FAR-mode machinery itself: keymap-swap/
+  relaunch, F2/F9/F11 menus, Alt+F10 fuzzy folder jump, and the folder
+  shortcuts list. Written specifically for this project; see
   [docs/FAR-MODE.md](docs/FAR-MODE.md) for how they work.
 - [`openers.yazi`](plugins/openers.yazi) — `F` popup for configuring
   file-type openers and startup state (keymap mode, panel layout, hidden

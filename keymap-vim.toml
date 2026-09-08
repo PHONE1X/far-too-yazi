@@ -522,6 +522,26 @@ on   = "<A-p>"
 run  = "plugin plugin-manager"
 desc = "Browse and install yazi plugins"# }}}
 
+#far-bookmarks: pinned folders (FAR Manager's "folder shortcuts"). The
+#backtick opens the list to manage it, ' jumps with a single keypress, and
+#Alt+B pins the directory the panel is currently in. Unlike zoxide (Alt+F12
+#in FAR mode), this list holds only what you put in it -- nothing is guessed
+#from history. {{{
+[[mgr.prepend_keymap]]
+on   = "`"
+run  = "plugin far-bookmarks"
+desc = "Bookmarked folders (add / jump / rename / delete)"
+
+[[mgr.prepend_keymap]]
+on   = "'"
+run  = "plugin far-bookmarks jump"
+desc = "Jump to a bookmarked folder (one keypress)"
+
+[[mgr.prepend_keymap]]
+on   = "<A-b>"
+run  = "plugin far-bookmarks add"
+desc = "Bookmark the current directory"# }}}
+
 
 #КОПИРОВАНИЕ В СИСТЕМНЫЙ БУФЕР {{{
 [[mgr.prepend_keymap]]

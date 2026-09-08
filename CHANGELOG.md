@@ -4,6 +4,54 @@ Notable changes to this config distribution. Grouped by the day the work
 landed rather than version tags, since this isn't released as a versioned
 package.
 
+## 2026-09-08
+
+### Added
+
+- **Bookmarked folders** (`far-bookmarks.yazi`, new) — FAR Manager's folder
+  shortcuts / Total Commander's directory hotlist, which yazi has no
+  equivalent of. A hand-built list of directories, each with a
+  one-character key, so a folder you use daily is two keystrokes away.
+  Bindings: `` ` `` (vim) / `Ctrl+D` (FAR) opens the list, `'` (vim) /
+  `Alt+F11` (FAR) is the one-keypress jump menu, `Alt+B` (both) pins the
+  current directory. Inside the list: Enter go, `t` open in a new tab, `a`
+  pin the current folder, `A` the hovered one, `r` rename, `s` change the
+  key, `d`/`x` delete, `J`/`K` reorder, and a bookmark's own key jumps
+  straight to it.
+
+  This closes the "Bookmarks / fast-travel for FAR mode" roadmap item.
+  `zoxide` (`Alt+F12`) and `fzf` already covered "get me somewhere I have
+  been", but both infer from history; the point of this list is that it
+  contains only what you put in it.
+
+  Storage is `bookmarks-data.lua` in the yazi config directory — a plain
+  Lua table, hand-editable and safe to commit, same approach as
+  `openers-data.lua`. A missing directory is reported when you try to jump
+  to it, rather than the jump silently doing nothing.
+
+  On the first run only, the file is seeded with the gaming directories
+  that are tedious to navigate to by hand — the Steam library
+  (`steamapps/common`), the Proton prefixes (`steamapps/compatdata`), the
+  PortProton prefixes, and the installed Proton builds
+  (`compatibilitytools.d`) — trying the native, Flatpak and `~/.steam`
+  layouts for each and skipping whatever is absent. Emptying the list does
+  not bring the seed back.
+- **Bookmarks reachable from the menus** (`far-menu.yazi`) — a new
+  `bookmarks` sub-menu (jump / open the list / pin the current folder / pin
+  the hovered folder), linked from the F9 main menu (`b`), plus a direct
+  entry in the F2 user menu (`f`) and the F11 plugin commands (`d`).
+
+### Fixed
+
+- `far-menu.yazi` passed multi-word plugin arguments as separate table
+  entries (`args = { "plugin-name", "add", "hovered" }`). yazi hands a
+  plugin everything after the name as a single argument string and splits
+  it itself, so the second word was silently dropped — the menu entry ran
+  the bare command instead. Now passed as one string
+  (`{ "plugin-name", "add hovered" }`). The same rule applies in keymap
+  files: a second bare word needs a `--` separator
+  (`plugin far-bookmarks -- add hovered`).
+
 ## 2026-08-24 (later)
 
 ### Added

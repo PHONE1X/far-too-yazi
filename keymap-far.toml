@@ -100,6 +100,17 @@ keymap = [
 	{ on = "<A-F12>", run = "plugin zoxide",       desc = "Folder history (zoxide)" },
 	{ on = "<A-F4>",  run = "plugin openers",      desc = "Configure file-type openers / startup settings" },
 	{ on = "<A-p>",   run = "plugin plugin-manager", desc = "Browse and install yazi plugins" },
+
+	# ---------------- Folder shortcuts (bookmarks) ----------------
+	# FAR Manager's "folder shortcuts": a hand-built list of the folders you
+	# keep coming back to. Ctrl+D is where Total Commander puts the same
+	# thing, and it is free here. Alt+F11 is the one-keypress jump list, so
+	# it sits with the other Alt+F-key jumps (Alt+F8 fzf, Alt+F10 tree,
+	# Alt+F12 zoxide) -- the difference being that this list is only ever
+	# what you pinned yourself, never guessed from history.
+	{ on = "<C-d>",   run = "plugin far-bookmarks",      desc = "Folder shortcuts (add / jump / rename / delete)" },
+	{ on = "<A-F11>", run = "plugin far-bookmarks jump", desc = "Jump to a bookmarked folder (one keypress)" },
+	{ on = "<A-b>",   run = "plugin far-bookmarks add",  desc = "Bookmark the current directory" },
 	# kitty/iTerm2 have drag-and-drop built into the terminal itself (no
 	# binding needed). Everywhere else needs an external helper -- `dragon`
 	# (AUR: dragon-drag-and-drop, NOT the KDE media player of the same name
