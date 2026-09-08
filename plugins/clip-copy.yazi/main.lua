@@ -1,11 +1,12 @@
+-- cx.yanked iterates as (index, File) — not a bare Url — so the file's
+-- path comes from file.url, and directory-ness from file.cha.is_dir
+-- (Url itself has no is_regular field on this Yazi version).
 local get_yanked_paths = ya.sync(function(state)
 	local paths = {}
-	for _, v in pairs(cx.yanked) do
-		if not v.is_regular then
-			goto continue
+	for _, file in pairs(cx.yanked) do
+		if file.cha and not file.cha.is_dir then
+			table.insert(paths, tostring(file.url))
 		end
-		table.insert(paths, tostring(v))
-		::continue::
 	end
 	return paths
 end)

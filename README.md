@@ -172,6 +172,8 @@ additions below). From inside yazi:
 | `t` | New workspace (when dual-pane is on) / new tab (when off) |
 | `Y` | Move selection to the other pane (dual-pane) / cancel yank (off) |
 | `Ctrl+Y` | Copy selection to the other pane (dual-pane only) |
+| `p` | Paste into the current directory, asks on name conflicts (never jumps into a hovered folder) |
+| `Alt+Y` | Paste into the hovered folder if one is highlighted, asks on name conflicts (falls back to the current directory otherwise) |
 | `F` | Configure file-type openers / startup settings |
 | `Alt+D` | Drag-and-drop the selection out (kitty/iTerm2: native; other terminals: via `dragon`) |
 | `Alt+I` | Drag-and-drop files in from another app (via `dragon`) |
@@ -286,11 +288,10 @@ versions):**
 - [`mount.yazi`](plugins/mount.yazi), [`git.yazi`](plugins/git.yazi),
   [`full-border.yazi`](plugins/full-border.yazi),
   [`chmod.yazi`](plugins/chmod.yazi),
-  [`smart-paste.yazi`](plugins/smart-paste.yazi),
   [`toggle-pane.yazi`](plugins/toggle-pane.yazi) — [yazi-rs](https://github.com/yazi-rs/plugins)
 - [`compress.yazi`](plugins/compress.yazi) — [Ciarán O'Brien / KKV9](https://github.com/KKV9/compress)
 - [`ouch.yazi`](plugins/ouch.yazi) — [ndtoan96](https://github.com/ndtoan96/ouch)
-- [`clipboard.yazi`](plugins/clipboard.yazi) — [XYenon](https://github.com/XYenon/clipboard)
+- [`clip-copy.yazi`](plugins/clip-copy.yazi) — [XYenon](https://github.com/XYenon/clipboard) (renamed from `clipboard.yazi`: Yazi 26.x ships a built-in plugin also named `clipboard`, and the name collision silently broke copy-to-clipboard)
 - [`relative-motions.yazi`](plugins/relative-motions.yazi) — [dedukun](https://github.com/dedukun/relative-motions)
 - [`allmytoes.yazi`](plugins/allmytoes.yazi) — [Sonico98](https://github.com/Sonico98/allmytoes)
 - [`restore.yazi`](plugins/restore.yazi) — [boydaihungst](https://github.com/boydaihungst/restore)

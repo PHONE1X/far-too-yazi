@@ -145,8 +145,9 @@ keymap = [
 
 	# ------------------------- Clipboard --------------------------
 	# FAR/Windows muscle memory: Ctrl+Ins copies, Shift+Ins pastes.
-	{ on = "<C-Insert>", run = [ "yank", 'plugin clipboard -- --action=copy' ], desc = "Copy to the clipboard" },
-	{ on = "<S-Insert>", run = "plugin merge-paste",                            desc = "Paste (asks on name conflicts)" },
+	{ on = "<C-Insert>", run = [ "yank", 'plugin clip-copy -- --action=copy' ], desc = "Copy to the clipboard" },
+	{ on = "<S-Insert>", run = "plugin merge-paste cwd",                        desc = "Paste into the current directory (asks on name conflicts)" },
+	{ on = "<A-y>",      run = "plugin merge-paste",                            desc = "Paste into the hovered folder, asks on name conflicts (falls back to cwd)" },
 	{ on = "<A-Insert>", run = "yank --cut",                                    desc = "Cut" },
 	{ on = "<A-u>",      run = "plugin restore",                                desc = "Undo the last delete" },
 
@@ -212,7 +213,6 @@ keymap = [
 	# when this file was rewritten for Phase 3 (the tail copy stopped short of it).
 	# Everything else in that block was deliberately superseded by an F-key or
 	# Alt-prefix binding above; these two were not, so they are restored here.
-	{ on = "P", run = "plugin smart-paste",               desc = "Paste into the hovered directory or CWD" },
 	{ on = "U", run = "plugin restore -- --interactive",  desc = "Restore deleted files (interactive)" },
 ]
 
