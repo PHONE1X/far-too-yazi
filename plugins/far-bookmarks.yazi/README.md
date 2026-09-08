@@ -101,7 +101,7 @@ explicitly with `A` in the popup or `-- add hovered`.
 
 ## Part of
 
-[far-too-yazi](https://github.com/PHONE1X/far-too-yazi) — a FAR
+[far-too-yazi](https://github.com/PHONE1X/far2yazi) — a FAR
 Manager-style yazi configuration. Works standalone in any yazi config too;
 it has no dependencies beyond yazi itself.
 

@@ -155,7 +155,7 @@ Two separate things, don't confuse them:
 ## Install
 
 ```sh
-git clone https://github.com/PHONE1X/far-too-yazi.git
+git clone https://github.com/PHONE1X/far2yazi.git
 cd far-too-yazi
 ./install.sh
 ```

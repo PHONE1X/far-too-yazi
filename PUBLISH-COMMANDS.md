@@ -1,6 +1,6 @@
 # Next steps — run these in your own terminal
 
-Repo is live: **https://github.com/PHONE1X/far-too-yazi**
+Repo is live: **https://github.com/PHONE1X/far2yazi**
 
 Run everything below on your machine directly (not through Cowork/Claude)
 — this terminal has your git identity and GitHub credentials configured,
@@ -67,7 +67,7 @@ git push
 ```
 
 Verify it actually worked after pushing — browse to
-`https://github.com/PHONE1X/far-too-yazi/tree/main/plugins/split-tabs.yazi`
+`https://github.com/PHONE1X/far2yazi/tree/main/plugins/split-tabs.yazi`
 and confirm you see `main.lua` and the other files, not an empty directory
 or a "this is a broken submodule link" notice.
 
@@ -93,7 +93,7 @@ or a "this is a broken submodule link" notice.
 ## 4. Announcing it
 
 A draft post is in `ANNOUNCE.md` — replace the `<link>` placeholder with
-`https://github.com/PHONE1X/far-too-yazi`, then it's ready to adapt for
+`https://github.com/PHONE1X/far2yazi`, then it's ready to adapt for
 GitHub Discussions ("Show and tell"), the yazi Discord/Matrix, or wherever
 else you want to post it. Worth checking yazi's own docs/README for
 whether a community plugin list exists before posting there too — not
